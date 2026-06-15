@@ -7,6 +7,7 @@ from qgis.core import (
     QgsField,
     QgsGeometry,
     QgsWkbTypes,
+    QgsDistanceArea,
 )
 
 import processing
@@ -30,7 +31,23 @@ from .hogstplan_style import (
 from .hogstplan_layout import skriv_kart_pdf_robust
 
 
-def _lag_takstlag_med_originalareal(takstlag):
+def _lag_arealmalar(crs):
+    malar = QgsDistanceArea()
+    malar.setSourceCrs(crs, QgsProject.instance().transformContext())
+    ellipsoide = QgsProject.instance().ellipsoid()
+    if ellipsoide:
+        malar.setEllipsoid(ellipsoide)
+    return malar
+
+
+def _geom_areal(geom, arealmalar):
+    try:
+        return float(arealmalar.measureArea(geom))
+    except Exception:
+        return geom.area()
+
+
+def _lag_takstlag_med_originalareal(takstlag, arealmalar):
     crs_authid = takstlag.crs().authid()
     geom_type = QgsWkbTypes.displayString(takstlag.wkbType())
     temp_layer = QgsVectorLayer(f"{geom_type}?crs={crs_authid}", "takst_med_areal", "memory")
@@ -51,7 +68,7 @@ def _lag_takstlag_med_originalareal(takstlag):
         ny.setGeometry(geom)
 
         attrs = feat.attributes()
-        attrs.append(geom.area())
+        attrs.append(_geom_areal(geom, arealmalar))
         ny.setAttributes(attrs)
         nye_feats.append(ny)
 
@@ -161,7 +178,8 @@ def koyr_hogstplan(params):
     except Exception as e:
         raise Exception(f"Klarte ikkje a fikse geometri for driftsmetodelag: {e}")
 
-    takst_input = _lag_takstlag_med_originalareal(takstlag) if arealveg else takstlag
+    arealmalar = _lag_arealmalar(takstlag.crs())
+    takst_input = _lag_takstlag_med_originalareal(takstlag, arealmalar) if arealveg else takstlag
 
     try:
         inter_layer = processing.run(
@@ -214,7 +232,7 @@ def koyr_hogstplan(params):
 
         if arealveg:
             areal_original = to_float(feat["ORIG_AREA"])
-            areal_del = geom.area()
+            areal_del = _geom_areal(geom, arealmalar)
             if areal_original > 0:
                 vekt = areal_del / areal_original
                 gran *= vekt

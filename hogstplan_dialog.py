@@ -350,6 +350,19 @@ class HogstplanDialog(QDialog):
             QMessageBox.warning(self, "Manglar felt", str(e))
             return
 
+        if not (
+            self.chk_lag_polygon.isChecked()
+            or self.chk_lag_csv.isChecked()
+            or self.chk_lag_pdf.isChecked()
+            or self.chk_lag_kart_pdf.isChecked()
+        ):
+            QMessageBox.warning(
+                self,
+                "Manglar output",
+                "Vel minst eitt output: polygonlag, CSV, tabell-PDF eller kart-PDF.",
+            )
+            return
+
         treng_eksportmappe = (
             self.chk_lag_csv.isChecked()
             or self.chk_lag_pdf.isChecked()

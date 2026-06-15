@@ -1,0 +1,17 @@
+[general]
+name=Hogstplan
+qgisMinimumVersion=3.28
+description=Lag driftsområde frå takstdata og driftsmetode, med CSV-, tabell-PDF- og kart-PDF-rapport.
+version=1.0.0
+author=OpenAI Copilot
+email=
+about=Plugin for å lage hogstområde etter hogstmoden periode og driftsmetode, med arealveging av volum, resultatlag, CSV, tabell-PDF og kart-PDF på nynorsk.
+category=Vector
+icon=icon.png
+experimental=False
+deprecated=False
+hasProcessingProvider=False
+homepage=
+tracker=
+repository=
+tags=skog,hogst,takst,drift,rapport,pyqgis,kart,pdf
